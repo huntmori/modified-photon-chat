@@ -256,6 +256,16 @@ namespace Photon.Chat
                 this.chatPeer.NameServerPortOverride = appSettings.Port;
             }
 
+            this.AuthValues.AuthType = CustomAuthenticationType.Custom;
+            Dictionary<string, object> authParams = new();
+            // 데모채팅 입장 시 입력하는 아이디 => 원래 서비스에서 사용하는 아이디라고 가정
+            authParams.Add("PlatformAccountId", this.UserId);
+            authParams.Add("AuthorizationToken", Guid.NewGuid().ToString());
+            authParams.Add("AppVersion", appSettings.AppVersion);
+            authParams.Add("AppId", appSettings.AppIdChat);
+            authParams.Add("FixedRegion", appSettings.FixedRegion);
+
+            this.AuthValues.SetAuthPostData(authParams);
             return this.Connect(appSettings.AppIdChat, appSettings.AppVersion, this.AuthValues);
         }
 
@@ -554,6 +564,7 @@ namespace Photon.Chat
         /// <returns>False if the client is not yet ready to send messages.</returns>
         public bool PublishMessage(string channelName, object message, bool forwardAsWebhook = false)
         {
+            Dictionary<string, object> map = this.GetMessageParameterDictionary("Chat", "Public", message);
             return this.publishMessage(channelName, message, true, forwardAsWebhook);
         }
 
@@ -604,9 +615,20 @@ namespace Photon.Chat
         /// <returns>True if this clients can send the message to the server.</returns>
         public bool SendPrivateMessage(string target, object message, bool forwardAsWebhook = false)
         {
-            return this.SendPrivateMessage(target, message, false, forwardAsWebhook);
+            Dictionary<string, object> map = this.GetMessageParameterDictionary("Chat", "Private", message);
+            return this.SendPrivateMessage(target, map, false, forwardAsWebhook);
         }
-
+        public Dictionary<string, object> GetMessageParameterDictionary(string mainType, string subType, object message)
+        {
+            Dictionary<string, object> messageParams = new()
+            {
+                { "MainType", mainType },
+                { "SubType", subType },
+                { "Nickname", this.UserId },
+                { "MessageData", message.ToString() }
+            };
+            return messageParams;
+        }
         /// <summary>
         /// Sends a private message to a single target user. Calls OnPrivateMessage on the receiving client.
         /// </summary>

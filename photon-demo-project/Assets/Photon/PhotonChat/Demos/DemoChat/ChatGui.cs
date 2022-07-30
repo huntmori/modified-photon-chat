@@ -313,7 +313,7 @@ namespace Photon.Chat.Demo
 
                     string targetUser = subtokens[0];
                     string message = subtokens[1];
-                    this.chatClient.SendPrivateMessage(targetUser, message);
+                    this.chatClient.SendPrivateMessage(targetUser, message, true);
                 }
                 else if ((tokens[0].Equals("\\join") || tokens[0].Equals("\\j")) && !string.IsNullOrEmpty(tokens[1]))
                 {
@@ -338,14 +338,16 @@ namespace Photon.Chat.Demo
             {
                 if (doingPrivateChat)
                 {
-                    this.chatClient.SendPrivateMessage(privateChatTarget, inputLine);
+                    this.chatClient.SendPrivateMessage(privateChatTarget, inputLine, true);
                 }
                 else
                 {
-                    this.chatClient.PublishMessage(this.selectedChannelName, inputLine, true);
+                     this.chatClient.PublishMessage(this.selectedChannelName, inputLine, true);
                 }
             }
         }
+
+        
 
         public void PostHelpToCurrentChannel()
         {
